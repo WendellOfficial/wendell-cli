@@ -36,7 +36,7 @@ Wendell's hosted service generates suites from reviewed Playbooks. Your own
 For unreleased changes from current main:
 
 ```bash
-python3 -m pip install "git+https://github.com/croppia/wendell-cli.git"
+python3 -m pip install "git+https://github.com/WendellOfficial/wendell-cli.git"
 ```
 
 For release validation from this repository, run:
