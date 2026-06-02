@@ -4,7 +4,11 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import tomllib
+
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised on Python 3.10
+    import tomli as tomllib
 
 import pytest
 
