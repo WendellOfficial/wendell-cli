@@ -1,0 +1,8 @@
+.pytest_cache/
+build/
+dist/
+.venv/
+src/*.egg-info/
+src/worldsim
+__pycache__/
+*.pyc
