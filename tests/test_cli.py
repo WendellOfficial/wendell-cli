@@ -1016,6 +1016,7 @@ def test_cli_suites_configure_generates_exact_tool_manifest_adapter(tmp_path: Pa
                         "requires": [],
                         "unsafe_if": [],
                         "scenario_coverage": ["playbook_workflow_1"],
+                        "metadata": {"deprecated": False, "owner": None},
                     },
                     {
                         "name": "repository.read_git_status",
@@ -1044,6 +1045,7 @@ def test_cli_suites_configure_generates_exact_tool_manifest_adapter(tmp_path: Pa
     assert "def issue_transcript__read_the_user_bug_report_and_constraints" in adapter
     assert "def repository__read_git_status" in adapter
     assert "wendell.handshake" in adapter
+    compile(adapter, str(tmp_path / "scripts" / "wendell_agent_adapter.py"), "exec")
 
 
 def test_cli_suites_configure_writes_escaped_toml_strings(tmp_path: Path, monkeypatch) -> None:

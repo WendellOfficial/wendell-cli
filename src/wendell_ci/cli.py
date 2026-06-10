@@ -8,6 +8,7 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import pprint
 import re
 import shutil
 import shlex
@@ -856,7 +857,7 @@ if __name__ == "__main__":
 
 def _exact_agent_adapter_template(tool_contracts: list[dict[str, Any]]) -> str:
     contracts = [dict(item) for item in tool_contracts if item.get("name")]
-    contract_json = json.dumps(contracts, indent=2, sort_keys=True)
+    contract_literal = pprint.pformat(contracts, sort_dicts=True, width=100)
     functions = "\n\n".join(_adapter_tool_function(str(contract["name"]), dict(contract.get("arguments") or {})) for contract in contracts)
     return f'''#!/usr/bin/env python3
 """Generated Wendell adapter for exact suite tool contracts.
@@ -872,7 +873,7 @@ import json
 import sys
 
 
-TOOL_CONTRACTS = {contract_json}
+TOOL_CONTRACTS = {contract_literal}
 SUPPORTED_TOOLS = [contract["name"] for contract in TOOL_CONTRACTS]
 
 
