@@ -926,6 +926,60 @@ def test_cli_suites_configure_writes_hosted_config_and_adapter(tmp_path: Path, m
     assert "wendell-example" not in adapter
 
 
+def test_cli_suites_configure_writes_adapter_command_relative_to_config_dir(
+    tmp_path: Path, monkeypatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("WENDELL_CONFIG_HOME", str(tmp_path / "wendell-config"))
+    assert main(["login", "--api-key", "inkpass-key", "--api-url", "http://127.0.0.1:8765"]) == 0
+
+    class FakeRemoteClient:
+        def __init__(self, api_url: str, api_key: str | None = None) -> None:
+            self.api_url = api_url
+
+        def list_test_suites(self) -> dict:
+            return {
+                "test_suites": [
+                    {
+                        "slug": "coding-agent-regression",
+                        "world_version": 1,
+                        "scenario_pack": "coding-agent-pack",
+                        "scenario_pack_version": 1,
+                    }
+                ]
+            }
+
+        def get_test_suite(self, suite_slug: str) -> dict:
+            return {
+                "world": {"slug": suite_slug},
+                "versions": [{"version": 1}],
+                "scenario_packs": [{"slug": "coding-agent-pack", "version": 1}],
+                "tool_contracts": [{"name": "repository.read_git_status", "arguments": {}}],
+            }
+
+    monkeypatch.setattr("wendell_ci.cli.RemoteWendellClient", FakeRemoteClient)
+
+    config_path = tmp_path / "user-projects" / "coding-agent" / "wendell.generated.toml"
+    adapter_path = tmp_path / "user-projects" / "coding-agent" / "generated_adapter.py"
+
+    exit_code = main(
+        [
+            "suites",
+            "configure",
+            "--suite",
+            "coding-agent-regression",
+            "--config",
+            str(config_path),
+            "--adapter",
+            str(adapter_path),
+        ]
+    )
+
+    assert exit_code == 0
+    config = config_path.read_text(encoding="utf-8")
+    assert 'agent_command = "python generated_adapter.py"' in config
+
+
 def test_cli_suites_configure_generates_exact_tool_manifest_adapter(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("WENDELL_CONFIG_HOME", str(tmp_path / "wendell-config"))

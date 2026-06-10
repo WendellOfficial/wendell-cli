@@ -363,7 +363,7 @@ def _suites_configure(args: argparse.Namespace) -> int:
         config_path = Path(args.config)
         adapter_path = Path(args.adapter)
         manifest_path = config_path.parent / "wendell_tool_manifest.json"
-        agent_command = args.agent_command or f"python {adapter_path.as_posix()}"
+        agent_command = args.agent_command or _default_adapter_agent_command(config_path, adapter_path)
         for path in [config_path, adapter_path, manifest_path]:
             if path.exists() and not args.force:
                 raise ValueError(f"`{path}` already exists. Re-run with --force to overwrite.")
@@ -1349,6 +1349,14 @@ def _tool_manifest_template(suite_slug: str, tool_contracts: list[dict[str, Any]
         "tool_contracts": tool_contracts,
     }
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
+
+
+def _default_adapter_agent_command(config_path: Path, adapter_path: Path) -> str:
+    cwd = Path.cwd()
+    base_dir = config_path.parent if config_path.is_absolute() else cwd / config_path.parent
+    absolute_adapter_path = adapter_path if adapter_path.is_absolute() else cwd / adapter_path
+    command_path = os.path.relpath(absolute_adapter_path, start=base_dir)
+    return f"python {shlex.quote(str(command_path))}"
 
 
 def _suite_runtime_world_slug(suite: dict[str, Any], suite_slug: str) -> str:
